@@ -27,16 +27,21 @@ export default function Portfolio({ currentAccount }: { currentAccount: string |
             const provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
 
-            const [yesBets, noBets, totalYesPool, totalNoPool] = await Promise.all([
+            const [rawYesBets, rawNoBets, rawTotalYes, rawTotalNo] = await Promise.all([
                 contract.yesBets(currentAccount),
                 contract.noBets(currentAccount),
                 contract.totalYesPool(),
                 contract.totalNoPool()
             ]);
 
-            const totalPool = totalYesPool + totalNoPool;
-            let impliedYes = 0n;
-            let impliedNo = 0n;
+            const yesBets = BigInt(rawYesBets.toString());
+            const noBets = BigInt(rawNoBets.toString());
+            const totalYesPool = BigInt(rawTotalYes.toString());
+            const totalNoPool = BigInt(rawTotalNo.toString());
+
+            const totalPool: bigint = totalYesPool + totalNoPool;
+            let impliedYes: bigint = 0n;
+            let impliedNo: bigint = 0n;
 
             if (yesBets > 0n && totalYesPool > 0n) {
                 impliedYes = (yesBets * totalPool) / totalYesPool;
